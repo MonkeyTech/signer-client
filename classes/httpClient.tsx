@@ -11,15 +11,6 @@ class HttpClient {
     const res = await this.axios.post(`/signature`);
     return res;
   };
-
-//   rateExpert = async (id: string, rating: string) => {
-//     try {
-//       const res = await this.axios.post(`/experts/${id}/reviews`, { rating });
-//       return res;
-//     } catch (err) {
-//       console.log("err:", err);
-//     }
-//   };
 }
 
 const httpClient = new HttpClient();
