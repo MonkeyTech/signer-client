@@ -61,7 +61,7 @@ const Home = ({ url }: Props) => {
     const pngImage = await pdfDoc.embedPng(pngImageBytes);
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await pdfDoc.save();
-
+    
   }
 
   useEffect(() => {
