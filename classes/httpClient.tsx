@@ -17,10 +17,10 @@ class HttpClient {
     return res.data.data;
   };
 
-  // presignedURL  = async () => {
-  //   const res = await this.axios.post(`/signatures/presigned_urls`)
-  //   return res.data.data;
-  // };
+  presignedURL  = async () => {
+    const res = await this.axios.post(`/signatures/presigned_urls`)
+    return res.data.data;
+  };
 }
 
 const httpClient = new HttpClient();

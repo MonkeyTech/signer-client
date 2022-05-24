@@ -7,6 +7,7 @@ import { Button } from "../src/components/Data/Signature.style";
 import { PDFDocument } from "pdf-lib";
 import { useEffect } from "react";
 import httpClient from "../classes/httpClient";
+import { uploadFileV2 } from "../src/utils";
 interface Props {
   url: string;
 }
@@ -29,7 +30,7 @@ const Home = ({ url }: Props) => {
   });
   const [recSize, setRecSize] = useState<IRecSize>({ x: 0, y: 0, width: 150 });
   const [signedPDF, setSignedPDF] = useState();
-   
+
   async function getPDFPosition(url: string) {
     const pdfDocPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(pdfDocPdfBytes);
@@ -61,7 +62,18 @@ const Home = ({ url }: Props) => {
     const pngImage = await pdfDoc.embedPng(pngImageBytes);
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await pdfDoc.save();
-    
+    try {
+      const response = await uploadFileV2(
+        'other',
+        pdfBytes,
+        "output",
+      );
+      console.log(response,'res');
+      
+    } catch (error) {
+      console.log(error);
+      
+    }
   }
 
   useEffect(() => {
