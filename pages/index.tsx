@@ -60,6 +60,7 @@ const Home = ({ url }: Props) => {
       res.arrayBuffer()
     );
     const pngImage = await pdfDoc.embedPng(pngImageBytes);
+    //@ts-ignore
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await pdfDoc.save();
     try {
