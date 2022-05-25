@@ -25,12 +25,8 @@ const Home = ({ url }: Props) => {
   const [openModal, setOpenModal] = useState(false);
   const [image, setImage] = useState("");
   const [PDFSize, setPDFSize] = useState<IPDFSize>({ height: 0, width: 0 });
-  const [canvasSize, setCanvasSize] = useState<IPDFSize>({
-    height: 0,
-    width: 0,
-  });
+  const [canvasSize, setCanvasSize] = useState<IPDFSize>({ height: 0, width: 0 });
   const [recSize, setRecSize] = useState<IRecSize>({ x: 0, y: 0, width: 150 });
-  const [signedPDF, setSignedPDF] = useState();
 
   async function getPDFPosition(url: string) {
     const pdfDocPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
