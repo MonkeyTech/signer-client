@@ -8,17 +8,30 @@ class HttpClient {
       "https://madlanx-signer-server.herokuapp.com/api/v1";
   }
 
+  SendSignedPDF = async (key: string, token: string) => {
+    const res = await this.axios.post(
+      `/signatures/signed`,
+      { "signed_contract_key": key },
+      {
+        headers: {
+          "x-token": token,
+        },
+      }
+    );
+    return res.data;
+  };
+
   GetPDF = async (token: string) => {
-    const res = await this.axios.get(`/signatures`,{
+    const res = await this.axios.get(`/signatures`, {
       headers: {
-        'x-token': token,
+        "x-token": token,
       },
     });
     return res.data.data;
   };
 
-  presignedURL  = async () => {
-    const res = await this.axios.post(`/signatures/presigned_urls`)
+  presignedURL = async () => {
+    const res = await this.axios.post(`/signatures/presigned_urls`);
     return res.data.data;
   };
 }

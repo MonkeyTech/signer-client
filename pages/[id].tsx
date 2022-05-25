@@ -10,6 +10,7 @@ import httpClient from "../classes/httpClient";
 import { uploadFileV2 } from "../src/utils";
 interface Props {
   url: string;
+  token: string;
 }
 export interface IPDFSize {
   height: number;
@@ -20,7 +21,7 @@ export interface IRecSize {
   y: number | undefined;
   width: number | undefined;
 }
-const Home = ({ url }: Props) => {
+const Home = ({ url, token }: Props) => {
 
   const [openModal, setOpenModal] = useState(false);
   const [image, setImage] = useState("");
@@ -58,8 +59,7 @@ const Home = ({ url }: Props) => {
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await pdfDoc.save();
     try {
-      const response = await uploadFileV2("other", pdfBytes, "output");
-      console.log(response, "res");
+      const response = await uploadFileV2("other", pdfBytes, "output",token);
     } catch (error) {
       console.log(error);
     }
@@ -121,6 +121,7 @@ export async function getStaticProps({ params }: Params) {
     return {
       props: {
         url: template_url,
+        token: params.id,
       },
     };
   } catch (err) {

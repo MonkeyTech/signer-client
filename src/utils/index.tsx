@@ -6,7 +6,8 @@ export const uploadFileV2 = async (
   type: "image" | "video" | "other",
   file: Uint8Array,
   file_name: string,
-  isPdf = false
+  token: string,
+  isPdf = false,
 ): Promise<{ name: string; url: string } | null> => {
   const dto = { type, file_name };
   try {
@@ -18,8 +19,8 @@ export const uploadFileV2 = async (
     if (indexOfDot) {
       name = file_name.slice(0, indexOfDot);
     }
-
-    return key;
+    const sendPDF = await httpClient.SendSignedPDF(key, token);
+    return sendPDF;
   } catch {
     return null;
   }
