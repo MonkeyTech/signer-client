@@ -20,7 +20,8 @@ export interface IRecSize {
   y: number | undefined;
   width: number | undefined;
 }
-const Home = () => {
+const Home = ({ url }: Props) => {
+
   const [openModal, setOpenModal] = useState(false);
   const [image, setImage] = useState("");
   const [PDFSize, setPDFSize] = useState<IPDFSize>({ height: 0, width: 0 });
@@ -49,9 +50,7 @@ const Home = () => {
 
   async function hadlePDFUplaod(imageURL: string | null) {
     if (!imageURL) return;
-    const pdfDocPdfBytes = await fetch("/pdfs/output.pdf").then((res) =>
-      res.arrayBuffer()
-    );
+    const pdfDocPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(pdfDocPdfBytes);
     const form = pdfDoc.getForm();
     const signatureFieldRect = form.getField("signature");
@@ -63,14 +62,10 @@ const Home = () => {
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await pdfDoc.save();
     try {
-      const response = await uploadFileV2(
-        'other',
-        pdfBytes,
-        "output",
-      );
+      const response = await uploadFileV2("other", pdfBytes, "output");
+      console.log(response, "res");
     } catch (error) {
       console.log(error);
-      
     }
   }
 
@@ -79,8 +74,9 @@ const Home = () => {
   }, [image]);
 
   useEffect(() => {
-    getPDFPosition("/pdfs/output.pdf");
-  }, []);
+    if (!url) return;
+    getPDFPosition(url);
+  }, [url]);
 
   return (
     <DocumentWrapper>
@@ -88,15 +84,15 @@ const Home = () => {
         onPageLoad={({ height, width }) => {
           setCanvasSize({ height, width });
         }}
-        url={"/pdfs/output.pdf"}
+        url={url}
       />
       <Button
         position="absolute"
         left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
         bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
-        width={
-          (recSize.width && recSize.width / (PDFSize.width / canvasSize.width))?.toString()
-        }
+        width={(
+          recSize.width && recSize.width / (PDFSize.width / canvasSize.width)
+        )?.toString()}
         onClick={() => setOpenModal(true)}
       >
         Sign
@@ -116,3 +112,34 @@ const Home = () => {
 };
 
 export default Home;
+
+interface Params {
+  params: {
+    id: string;
+  };
+}
+
+export async function getStaticProps({ params }: Params) {
+  try {
+    const { template_url } = await httpClient.GetPDF(params.id);
+    return {
+      props: {
+        url: template_url,
+      },
+    };
+  } catch (err) {
+    return { notFound: true };
+  }
+}
+
+export async function getStaticPaths() {
+  const data: string[] = [];
+  const paths = data.map((id) => {
+    return { params: { id: id } };
+  });
+
+  return {
+    paths: paths,
+    fallback: true,
+  };
+}

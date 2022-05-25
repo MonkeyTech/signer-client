@@ -2,7 +2,7 @@ import styled from "styled-components";
 interface Props {
   bottom?: number;
   left?: number;
-  width?: number;
+  width?: string;
   position?: "absolute" | "unset";
 }
 export const Button = styled.button<Props>`

@@ -15,6 +15,7 @@ const PdfDocument = ({ url, children }: Props) => {
   const [pages, setPages] = useState<PdfJS.PDFPageProxy[]>([]);
 
   useEffect(() => {
+    if(!url) return;
     PdfJS.getDocument(url).promise.then((newDoc: PdfJS.PDFDocumentProxy) => {
       setDoc(newDoc);
     });
