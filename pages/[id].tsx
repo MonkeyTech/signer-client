@@ -21,6 +21,7 @@ export interface IRecSize {
   x: number | undefined;
   y: number | undefined;
   width: number | undefined;
+  height: number | undefined;
 }
 const Home = ({ url, token }: Props) => {
   const [openModal, setOpenModal] = useState(false);
@@ -30,7 +31,7 @@ const Home = ({ url, token }: Props) => {
     height: 0,
     width: 0,
   });
-  const [recSize, setRecSize] = useState<IRecSize>({ x: 0, y: 0, width: 150 });
+  const [recSize, setRecSize] = useState<IRecSize>({ x: 0, y: 0, width: 150, height: 0 });
 
   async function getPDFPosition(url: string) {
     const pdfDocPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
@@ -45,6 +46,7 @@ const Home = ({ url, token }: Props) => {
       x: widgets[0].Rect()?.asRectangle().x,
       y: widgets[0].Rect()?.asRectangle().y,
       width: widgets[0].Rect()?.asRectangle().width,
+      height: widgets[0].Rect()?.asRectangle().height,
     });
   }
 
@@ -63,6 +65,8 @@ const Home = ({ url, token }: Props) => {
     const pdfBytes = await pdfDoc.save();
     try {
       const response = await uploadFileV2("other", pdfBytes, "output", token);
+      console.log("response");
+      
     } catch (error) {
       console.log(error);
     }
@@ -85,36 +89,20 @@ const Home = ({ url, token }: Props) => {
         }}
         url={url}
       />
-      {image ? (
-        <ImageWrapper
-          left={recSize.x &&  recSize.width &&recSize.x / (PDFSize.height / canvasSize.height)+((recSize.width / (PDFSize.width / canvasSize.width)/2)-25)}
-          bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
-        >
-          <Image height={40} width={40} src={image} />
-        </ImageWrapper>
-      ) : (
-        <Button
-          position="absolute"
-          left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
-          bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
-          width={(
-            recSize.width && recSize.width / (PDFSize.width / canvasSize.width)
-          )?.toString()}
-          onClick={() => setOpenModal(true)}
-        >
-          Sign
-        </Button>
-      )}
-      {openModal && (
-        <PopUpModal onClose={() => setOpenModal(false)}>
-          <Signature
-            onSign={(imageURL: string) => {
-              setOpenModal(false);
-              setImage(imageURL);
-            }}
-          />
-        </PopUpModal>
-      )}
+      <Signature
+        width={(
+          recSize.width && recSize.width / (PDFSize.width / canvasSize.width)
+        )?.toString()}
+        height={(
+          recSize.height && recSize.height / (PDFSize.width / canvasSize.width)
+        )?.toString()}
+        left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
+        bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
+        onSign={(imageURL: string) => {
+          setOpenModal(false);
+          setImage(imageURL);
+        }}
+      />
     </DocumentWrapper>
   );
 };
@@ -152,3 +140,41 @@ export async function getStaticPaths() {
     fallback: true,
   };
 }
+
+// {image ? (
+//   <ImageWrapper
+//     left={
+//       recSize.x &&
+//       recSize.width &&
+//       recSize.x / (PDFSize.height / canvasSize.height) +
+//         (recSize.width / (PDFSize.width / canvasSize.width) / 2 - 25)
+//     }
+//     bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
+//   >
+//     <Image height={40} width={40} src={image} />
+//   </ImageWrapper>
+// ) : (
+//   <Button
+//     position="absolute"
+//     left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
+//     bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
+//     width={(
+//       recSize.width && recSize.width / (PDFSize.width / canvasSize.width)
+//     )?.toString()}
+//     onClick={() => setOpenModal(true)}
+//   >
+//     Sign
+//   </Button>
+// )}
+// {openModal && (
+//   <PopUpModal onClose={() => setOpenModal(false)}>
+//     <Signature
+//       left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
+//       bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
+//       onSign={(imageURL: string) => {
+//         setOpenModal(false);
+//         setImage(imageURL);
+//       }}
+//     />
+//   </PopUpModal>
+// )}
