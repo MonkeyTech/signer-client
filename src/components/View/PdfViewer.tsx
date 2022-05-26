@@ -1,6 +1,5 @@
 import React from "react";
 import { IPDFSize } from "../../../pages";
-import PdfJS from "../../../lib/PdfJS";
 import PdfDocument from "../Data/PdfDocument";
 import PdfPageRenderer from "./PdfPageRenderer";
 

@@ -19,3 +19,9 @@ export const Button = styled.button<Props>`
   border: none;
   padding: 10px;
 `;
+
+export const ImageWrapper = styled.div<Props>`
+  position: absolute;
+  left: ${({ left }) => left}px;
+  bottom: ${({ bottom }) => bottom}px;
+`;
