@@ -7,15 +7,16 @@ export const uploadFileV2 = async (
   file: Uint8Array,
   file_name: string,
   token: string,
+  fingerprint: string,
   isPdf = false
 ): Promise<{ name: string; url: string } | null> => {
   try {
     const { key, url } = await httpClient.presignedURL();
     await unauthorizedInstance.put(url, file);
-    const sendPDF = await httpClient.SendSignedPDF(key, token);
+    const sendPDF = await httpClient.SendSignedPDF(key, token, fingerprint);
     return sendPDF;
   } catch (err) {
-    console.log(err, "ree");
+    console.log(err, "err");
     return null;
   }
 };

@@ -6,12 +6,13 @@ import PdfPageRenderer from "./PdfPageRenderer";
 type Props = {
   url: string;
   onPageLoad: ({height, width}:IPDFSize)=> void;
+  sendFingerprint: (fingerprint: string)=> void;
 };
 
-const PdfViewer = ({ url, onPageLoad }: Props) => {
+const PdfViewer = ({ url, onPageLoad, sendFingerprint }: Props) => {
   return (
     <>
-      <PdfDocument url={url}>
+      <PdfDocument sendFingerprint={(fingerprint: string)=>sendFingerprint(fingerprint)} url={url}>
         {({ pages }) => {
           return pages.map((page, index) => {
             return (

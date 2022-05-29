@@ -8,10 +8,10 @@ class HttpClient {
       "https://madlanx-signer-server.herokuapp.com/api/v1";
   }
 
-  SendSignedPDF = async (key: string, token: string) => {
+  SendSignedPDF = async (key: string, token: string, fingerprint: string) => {
     const res = await this.axios.post(
       `/signatures/signed`,
-      { "signed_contract_key": key },
+      { "signed_contract_key": key, "fingerprint": {fingerprint} },
       {
         headers: {
           "x-token": token,

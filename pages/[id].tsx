@@ -24,12 +24,14 @@ export interface IRecSize {
   width: number | undefined;
   height: number | undefined;
 }
+
 const Home = ({ url, token }: Props) => {
   const [openModal, setOpenModal] = useState(false);
   const [image, setImage] = useState("");
   const [PDFSize, setPDFSize] = useState<IPDFSize>({ height: 0, width: 0 });
   const [PDFDoc, setPDFDoc] = useState<PDFDocument>();
   const [signatureFieldRect, setSignatureFieldRect] = useState<PDFField>();
+  const [fingerprint, setFingerprint] = useState("");
   const [canvasSize, setCanvasSize] = useState<IPDFSize>({
     height: 0,
     width: 0,
@@ -69,7 +71,7 @@ const Home = ({ url, token }: Props) => {
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await PDFDoc.save();
     try {
-      const response = await uploadFileV2("other", pdfBytes, "output", token);
+      const response = await uploadFileV2("other", pdfBytes, "output", token,fingerprint);
       setOpenModal(true);
       console.log("response", response);
     } catch (error) {
@@ -89,6 +91,7 @@ const Home = ({ url, token }: Props) => {
   return (
     <DocumentWrapper>
       <PdfViewer
+        sendFingerprint={(fingerprint: string) => setFingerprint(fingerprint)}
         onPageLoad={({ height, width }) => {
           setCanvasSize({ height, width });
         }}

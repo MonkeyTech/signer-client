@@ -19,7 +19,7 @@ export const ModalContent = styled.div`
   padding: 20px;
   border: 1px solid #888;
   border-radius: 10px;
-  width: 80%;
+  width: 60%;
   height: 20%;
   justify-content: center;
   display: flex;
