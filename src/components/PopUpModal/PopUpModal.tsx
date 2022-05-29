@@ -4,13 +4,12 @@ import { CloseButton, Modal, ModalContent } from "./PopUpModal.style";
 
 interface Props {
   children: ReactElement;
-  onClose: () => void;
 }
 
-const PopUpModal = ({ children, onClose }: Props) => {
+const PopUpModal = ({ children }: Props) => {
   return (
     <Modal>
-      <CloseButton onClick={onClose}>X</CloseButton>
+      {/* <CloseButton onClick={onClose}>X</CloseButton> */}
       <ModalContent>{children}</ModalContent>
     </Modal>
   );

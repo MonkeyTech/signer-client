@@ -3,12 +3,13 @@ import PdfViewer from "../src/components/View/PdfViewer";
 import { DocumentWrapper } from "../src/components/View/PdfPageRenderer.style";
 import PopUpModal from "../src/components/PopUpModal/PopUpModal";
 import { useState } from "react";
-import { Button, ImageWrapper } from "../src/components/Data/Signature.style";
-import { PDFDocument } from "pdf-lib";
+import success from "../src/assets/success.svg";
+import { PDFDocument, PDFField, PDFForm } from "pdf-lib";
 import { useEffect } from "react";
 import httpClient from "../classes/httpClient";
 import { uploadFileV2 } from "../src/utils";
 import Image from "next/image";
+import { ModalText } from "../src/components/PopUpModal/PopUpModal.style";
 interface Props {
   url: string;
   token: string;
@@ -27,20 +28,28 @@ const Home = ({ url, token }: Props) => {
   const [openModal, setOpenModal] = useState(false);
   const [image, setImage] = useState("");
   const [PDFSize, setPDFSize] = useState<IPDFSize>({ height: 0, width: 0 });
+  const [PDFDoc, setPDFDoc] = useState<PDFDocument>();
+  const [signatureFieldRect, setSignatureFieldRect] = useState<PDFField>();
   const [canvasSize, setCanvasSize] = useState<IPDFSize>({
     height: 0,
     width: 0,
   });
-  const [recSize, setRecSize] = useState<IRecSize>({ x: 0, y: 0, width: 150, height: 0 });
+  const [recSize, setRecSize] = useState<IRecSize>({
+    x: 0,
+    y: 0,
+    width: 150,
+    height: 0,
+  });
 
   async function getPDFPosition(url: string) {
     const pdfDocPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(pdfDocPdfBytes);
     const page = pdfDoc.getPage(0);
     const form = pdfDoc.getForm();
+    setPDFDoc(pdfDoc);
     const signatureFieldRect = form.getField("signature");
+    setSignatureFieldRect(signatureFieldRect);
     const widgets = signatureFieldRect.acroField.getWidgets();
-
     setPDFSize(page.getSize());
     setRecSize({
       x: widgets[0].Rect()?.asRectangle().x,
@@ -51,22 +60,18 @@ const Home = ({ url, token }: Props) => {
   }
 
   async function hadlePDFUplaod(imageURL: string | null) {
-    if (!imageURL) return;
-    const pdfDocPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
-    const pdfDoc = await PDFDocument.load(pdfDocPdfBytes);
-    const form = pdfDoc.getForm();
-    const signatureFieldRect = form.getField("signature");
+    if (!imageURL || !signatureFieldRect || !PDFDoc) return;
     const pngImageBytes = await fetch(imageURL).then((res) =>
       res.arrayBuffer()
     );
-    const pngImage = await pdfDoc.embedPng(pngImageBytes);
+    const pngImage = await PDFDoc.embedPng(pngImageBytes);
     //@ts-ignore
     signatureFieldRect.setImage(pngImage);
-    const pdfBytes = await pdfDoc.save();
+    const pdfBytes = await PDFDoc.save();
     try {
       const response = await uploadFileV2("other", pdfBytes, "output", token);
-      console.log("response");
-      
+      setOpenModal(true);
+      console.log("response", response);
     } catch (error) {
       console.log(error);
     }
@@ -99,10 +104,17 @@ const Home = ({ url, token }: Props) => {
         left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
         bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
         onSign={(imageURL: string) => {
-          setOpenModal(false);
           setImage(imageURL);
         }}
       />
+      {openModal && (
+        <PopUpModal>
+          <>
+            <Image src={success} />
+            <ModalText>הטופס נשלח בהצלחה!</ModalText>
+          </>
+        </PopUpModal>
+      )}
     </DocumentWrapper>
   );
 };
@@ -140,41 +152,3 @@ export async function getStaticPaths() {
     fallback: true,
   };
 }
-
-// {image ? (
-//   <ImageWrapper
-//     left={
-//       recSize.x &&
-//       recSize.width &&
-//       recSize.x / (PDFSize.height / canvasSize.height) +
-//         (recSize.width / (PDFSize.width / canvasSize.width) / 2 - 25)
-//     }
-//     bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
-//   >
-//     <Image height={40} width={40} src={image} />
-//   </ImageWrapper>
-// ) : (
-//   <Button
-//     position="absolute"
-//     left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
-//     bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
-//     width={(
-//       recSize.width && recSize.width / (PDFSize.width / canvasSize.width)
-//     )?.toString()}
-//     onClick={() => setOpenModal(true)}
-//   >
-//     Sign
-//   </Button>
-// )}
-// {openModal && (
-//   <PopUpModal onClose={() => setOpenModal(false)}>
-//     <Signature
-//       left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
-//       bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
-//       onSign={(imageURL: string) => {
-//         setOpenModal(false);
-//         setImage(imageURL);
-//       }}
-//     />
-//   </PopUpModal>
-// )}

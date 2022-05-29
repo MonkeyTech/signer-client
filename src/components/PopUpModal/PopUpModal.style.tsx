@@ -20,6 +20,8 @@ export const ModalContent = styled.div`
   border: 1px solid #888;
   border-radius: 10px;
   width: 80%;
+  height: 20%;
+  justify-content: center;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,3 +35,7 @@ export const CloseButton = styled.button`
   top: 10px;
   font-size: 20px;
 `;
+
+export const ModalText = styled.label`
+margin-top: 10px;
+`
