@@ -1,6 +1,6 @@
 import Signature from "../src/components/Data/Signature";
 import PdfViewer from "../src/components/View/PdfViewer";
-import { DocumentWrapper } from "../src/components/View/PdfPageRenderer.style";
+import { DocumentWrapper, PageLayout } from "../src/components/View/PdfPageRenderer.style";
 import PopUpModal from "../src/components/PopUpModal/PopUpModal";
 import { useState } from "react";
 import success from "../src/assets/success.svg";
@@ -71,7 +71,13 @@ const Home = ({ url, token }: Props) => {
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await PDFDoc.save();
     try {
-      const response = await uploadFileV2("other", pdfBytes, "output", token,fingerprint);
+      const response = await uploadFileV2(
+        "other",
+        pdfBytes,
+        "output",
+        token,
+        fingerprint
+      );
       setOpenModal(true);
       console.log("response", response);
     } catch (error) {
@@ -89,36 +95,39 @@ const Home = ({ url, token }: Props) => {
   }, [url]);
 
   return (
-    <DocumentWrapper>
-      <PdfViewer
-        sendFingerprint={(fingerprint: string) => setFingerprint(fingerprint)}
-        onPageLoad={({ height, width }) => {
-          setCanvasSize({ height, width });
-        }}
-        url={url}
-      />
-      <Signature
-        width={(
-          recSize.width && recSize.width / (PDFSize.width / canvasSize.width)
-        )?.toString()}
-        height={(
-          recSize.height && recSize.height / (PDFSize.width / canvasSize.width)
-        )?.toString()}
-        left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
-        bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
-        onSign={(imageURL: string) => {
-          setImage(imageURL);
-        }}
-      />
-      {openModal && (
-        <PopUpModal>
-          <>
-            <Image src={success} />
-            <ModalText>הטופס נשלח בהצלחה!</ModalText>
-          </>
-        </PopUpModal>
-      )}
-    </DocumentWrapper>
+    <PageLayout>
+      <DocumentWrapper>
+        <PdfViewer
+          sendFingerprint={(fingerprint: string) => setFingerprint(fingerprint)}
+          onPageLoad={({ height, width }) => {
+            setCanvasSize({ height, width });
+          }}
+          url={url}
+        />
+        <Signature
+          width={(
+            recSize.width && recSize.width / (PDFSize.width / canvasSize.width)
+          )?.toString()}
+          height={(
+            recSize.height &&
+            recSize.height / (PDFSize.width / canvasSize.width)
+          )?.toString()}
+          left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
+          bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
+          onSign={(imageURL: string) => {
+            setImage(imageURL);
+          }}
+        />
+        {openModal && (
+          <PopUpModal>
+            <>
+              <Image src={success} />
+              <ModalText>הטופס נשלח בהצלחה!</ModalText>
+            </>
+          </PopUpModal>
+        )}
+      </DocumentWrapper>
+    </PageLayout>
   );
 };
 

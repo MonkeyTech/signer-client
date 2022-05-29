@@ -14,7 +14,6 @@ export const Button = styled.button<Props>`
         left: ${left}px;
         bottom: ${bottom}px;
         width: ${width}px;
-        height: ${height}px;
       `
       : `width: 100px;`};
   border-radius: 99px;

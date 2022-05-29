@@ -40,3 +40,11 @@ export const CanvasWrapper = styled.div`
     width: 100%;
   }
 `;
+export const PageLayout = styled.div`
+  @media ${device.mobileL} {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+`;
