@@ -76,7 +76,7 @@ const Home = ({ url, token }: Props) => {
         fingerprint
       );
       setOpenModal(true);
-      console.log("response", response);
+      if (response === null) setHasError(true);
     } catch (error: any) {
       setHasError(true);
       console.log(error);
