@@ -1,28 +1,24 @@
 import Signature from "../src/components/Data/Signature";
 import PdfViewer from "../src/components/View/PdfViewer";
-import { DocumentWrapper, PageLayout } from "../src/components/View/PdfPageRenderer.style";
+import {
+  DocumentWrapper,
+  PageLayout,
+} from "../src/components/View/PdfPageRenderer.style";
 import PopUpModal from "../src/components/PopUpModal/PopUpModal";
 import { useState } from "react";
 import success from "../src/assets/success.svg";
-import { PDFDocument, PDFField, PDFForm } from "pdf-lib";
+import decline from "../src/assets/decline.svg";
+import { PDFDocument, PDFTextField } from "pdf-lib";
 import { useEffect } from "react";
 import httpClient from "../classes/httpClient";
 import { uploadFileV2 } from "../src/utils";
 import Image from "next/image";
 import { ModalText } from "../src/components/PopUpModal/PopUpModal.style";
+import FingerprintJS, { Agent, GetResult } from "@fingerprintjs/fingerprintjs";
+import { IPDFSize, IRecSize } from "../src/utils/interface";
 interface Props {
   url: string;
   token: string;
-}
-export interface IPDFSize {
-  height: number;
-  width: number;
-}
-export interface IRecSize {
-  x: number | undefined;
-  y: number | undefined;
-  width: number | undefined;
-  height: number | undefined;
 }
 
 const Home = ({ url, token }: Props) => {
@@ -30,8 +26,9 @@ const Home = ({ url, token }: Props) => {
   const [image, setImage] = useState("");
   const [PDFSize, setPDFSize] = useState<IPDFSize>({ height: 0, width: 0 });
   const [PDFDoc, setPDFDoc] = useState<PDFDocument>();
-  const [signatureFieldRect, setSignatureFieldRect] = useState<PDFField>();
-  const [fingerprint, setFingerprint] = useState("");
+  const [hasError, setHasError] = useState(false);
+  const [signatureFieldRect, setSignatureFieldRect] = useState<PDFTextField>();
+  const [fingerprint, setFingerprint] = useState<string>();
   const [canvasSize, setCanvasSize] = useState<IPDFSize>({
     height: 0,
     width: 0,
@@ -43,13 +40,14 @@ const Home = ({ url, token }: Props) => {
     height: 0,
   });
 
-  async function getPDFPosition(url: string) {
+  const getPDFPosition = async (url: string) => {
     const pdfDocPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
     const pdfDoc = await PDFDocument.load(pdfDocPdfBytes);
     const page = pdfDoc.getPage(0);
     const form = pdfDoc.getForm();
+
     setPDFDoc(pdfDoc);
-    const signatureFieldRect = form.getField("signature");
+    const signatureFieldRect: PDFTextField = form.getTextField("signature");
     setSignatureFieldRect(signatureFieldRect);
     const widgets = signatureFieldRect.acroField.getWidgets();
     setPDFSize(page.getSize());
@@ -59,15 +57,14 @@ const Home = ({ url, token }: Props) => {
       width: widgets[0].Rect()?.asRectangle().width,
       height: widgets[0].Rect()?.asRectangle().height,
     });
-  }
+  };
 
-  async function hadlePDFUplaod(imageURL: string | null) {
+  const hadlePDFUplaod = async (imageURL: string | null) => {
     if (!imageURL || !signatureFieldRect || !PDFDoc) return;
     const pngImageBytes = await fetch(imageURL).then((res) =>
       res.arrayBuffer()
     );
     const pngImage = await PDFDoc.embedPng(pngImageBytes);
-    //@ts-ignore
     signatureFieldRect.setImage(pngImage);
     const pdfBytes = await PDFDoc.save();
     try {
@@ -80,10 +77,26 @@ const Home = ({ url, token }: Props) => {
       );
       setOpenModal(true);
       console.log("response", response);
-    } catch (error) {
+    } catch (error: any) {
+      setHasError(true);
       console.log(error);
     }
-  }
+  };
+
+  const handleOnSign = (imageURL: string) => {
+    setImage(imageURL);
+    getFingerPrint();
+  };
+
+  const getFingerPrint = () => {
+    FingerprintJS.load()
+      .then((fp: Agent) => {
+        return fp.get();
+      })
+      .then((result: GetResult) => {
+        console.log(result.visitorId);
+      });
+  };
 
   useEffect(() => {
     hadlePDFUplaod(image);
@@ -115,14 +128,16 @@ const Home = ({ url, token }: Props) => {
           left={recSize.x && recSize.x / (PDFSize.height / canvasSize.height)}
           bottom={recSize.y && recSize.y / (PDFSize.width / canvasSize.width)}
           onSign={(imageURL: string) => {
-            setImage(imageURL);
+            handleOnSign(imageURL);
           }}
         />
         {openModal && (
-          <PopUpModal>
+          <PopUpModal error={hasError} onClose={() => setOpenModal(false)}>
             <>
-              <Image src={success} />
-              <ModalText>הטופס נשלח בהצלחה!</ModalText>
+              <Image src={hasError ? decline : success} />
+              <ModalText>{`${
+                hasError ? "לא ניתן לשלוח את הקובץ" : "הקובץ נשלח בהצלחה!"
+              }`}</ModalText>
             </>
           </PopUpModal>
         )}

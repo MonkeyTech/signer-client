@@ -7,7 +7,7 @@ export const uploadFileV2 = async (
   file: Uint8Array,
   file_name: string,
   token: string,
-  fingerprint: string,
+  fingerprint: string | undefined,
   isPdf = false
 ): Promise<{ name: string; url: string } | null> => {
   try {

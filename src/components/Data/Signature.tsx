@@ -52,7 +52,7 @@ const Signature = ({ onSign, left, bottom, width, height }: Props) => {
         position="absolute"
         left={left && left - 110}
         bottom={bottom}
-        width={"100"}
+        width={100}
         onClick={save}
       >
         Send
