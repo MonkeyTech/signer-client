@@ -8,10 +8,9 @@ type ChildrenProps = {
 type Props = {
   url: string;
   children: (props: ChildrenProps) => any;
-  sendFingerprint: (fingerprint: string)=> void;
 };
 
-const PdfDocument = ({ url, children, sendFingerprint }: Props) => {
+const PdfDocument = ({ url, children }: Props) => {
   const [doc, setDoc] = useState<PdfJS.PDFDocumentProxy | null>(null);
   const [pages, setPages] = useState<PdfJS.PDFPageProxy[]>([]);
 
@@ -26,8 +25,7 @@ const PdfDocument = ({ url, children, sendFingerprint }: Props) => {
     if (!doc) return;
 
     const newPages: PdfJS.PDFPageProxy[] = [];
-    sendFingerprint(doc.fingerprints[0]);
-    
+    console.log(doc.fingerprints[0]);
     let promise = Promise.resolve();
     for (let i = 0; i < doc.numPages; ++i) {
       promise = promise.then(() => {

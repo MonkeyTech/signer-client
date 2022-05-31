@@ -8,7 +8,7 @@ import PopUpModal from "../src/components/PopUpModal/PopUpModal";
 import { useState } from "react";
 import success from "../src/assets/success.svg";
 import decline from "../src/assets/decline.svg";
-import { PDFDocument, PDFTextField } from "pdf-lib";
+import { PDFDocument, PDFSignature, PDFTextField } from "pdf-lib";
 import { useEffect } from "react";
 import httpClient from "../classes/httpClient";
 import { uploadFileV2 } from "../src/utils";
@@ -28,7 +28,7 @@ const Home = ({ url, token }: Props) => {
   const [PDFDoc, setPDFDoc] = useState<PDFDocument>();
   const [hasError, setHasError] = useState(false);
   const [signatureFieldRect, setSignatureFieldRect] = useState<PDFTextField>();
-  const [fingerprint, setFingerprint] = useState<string>();
+  const [fingerprint, setFingerprint] = useState('');
   const [canvasSize, setCanvasSize] = useState<IPDFSize>({
     height: 0,
     width: 0,
@@ -84,8 +84,8 @@ const Home = ({ url, token }: Props) => {
   };
 
   const handleOnSign = (imageURL: string) => {
-    setImage(imageURL);
     getFingerPrint();
+    setImage(imageURL);
   };
 
   const getFingerPrint = () => {
@@ -95,10 +95,12 @@ const Home = ({ url, token }: Props) => {
       })
       .then((result: GetResult) => {
         console.log(result.visitorId);
+        setFingerprint(result.visitorId);
       });
   };
 
   useEffect(() => {
+    if(!fingerprint) return;
     hadlePDFUplaod(image);
   }, [image]);
 
@@ -111,7 +113,6 @@ const Home = ({ url, token }: Props) => {
     <PageLayout>
       <DocumentWrapper>
         <PdfViewer
-          sendFingerprint={(fingerprint: string) => setFingerprint(fingerprint)}
           onPageLoad={({ height, width }) => {
             setCanvasSize({ height, width });
           }}

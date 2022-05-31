@@ -49,10 +49,6 @@ const Signature = ({ onSign, left, bottom, width, height }: Props) => {
         }}
       />
       <Button
-        position="absolute"
-        left={left && left - 110}
-        bottom={bottom}
-        width={100}
         onClick={save}
       >
         Send

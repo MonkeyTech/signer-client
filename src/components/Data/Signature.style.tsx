@@ -2,27 +2,21 @@ import styled from "styled-components";
 interface Props {
   bottom?: number;
   left?: number;
-  width?: number;
-  height?: string;
-  position?: "absolute" | "unset";
 }
-export const Button = styled.button<Props>`
-  ${({ position, left, bottom, width, height }) =>
-    position === "absolute"
-      ? `
-        position: ${position};
-        left: ${left}px;
-        bottom: ${bottom}px;
-        width: ${width}px;
-        @media (max-width:768px) {
-          width: ${width && width - 20}px;
-          left: ${left && left+20}px;
-          padding: 5px;
-        }
-      `
-      : `width: 100px;
-        padding: 10px;
-      `};
+export const Button = styled.button`
+  position: absolute;
+  bottom: 40px;
+  left: calc(50% - 100px);
+  width: 200px;
+  padding: 10px;
+  @media (max-width: 768px) {
+    left: calc(50% - 40px);
+    width: 80px;
+    padding: 5px;
+    bottom: 2%;
+  }
+  background: black;
+  color: #efefef;
   border-radius: 99px;
   border: none;
   cursor: pointer;
