@@ -1,8 +1,9 @@
+import Image from "next/image";
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 import SignaturePad from "react-signature-canvas";
-import { Button } from "./Signature.style";
-
+import { Button, ImageWrapper } from "./Signature.style";
+import trash from "../../assets/delete.svg";
 interface Props {
   left: number | undefined;
   bottom: number | undefined;
@@ -17,14 +18,19 @@ const Signature = ({ onSign, left, bottom, width, height }: Props) => {
   const [canvasWidth, setCanvasWidth] = useState(width);
 
   const save = () => {
+    if (sigCanvas.current.isEmpty()) return;
     setImageURL(sigCanvas.current.getTrimmedCanvas().toDataURL("image/png"));
-    sigCanvas.current.off(['off']);
+    sigCanvas.current.off(["off"]);
+  };
+
+  const clear = () => {
+    sigCanvas.current.clear(["clear"]);
   };
 
   useEffect(() => {
     if (!imageURL) return;
     onSign(imageURL);
-  });
+  }, [imageURL]);
 
   useEffect(() => {
     setCanvasheight(height);
@@ -36,8 +42,8 @@ const Signature = ({ onSign, left, bottom, width, height }: Props) => {
       <SignaturePad
         ref={sigCanvas}
         canvasProps={{
-          height:canvasheight,
-          width:canvasWidth,
+          height: canvasheight,
+          width: canvasWidth,
           style: {
             position: "absolute",
             left: `${left}px`,
@@ -48,11 +54,10 @@ const Signature = ({ onSign, left, bottom, width, height }: Props) => {
           },
         }}
       />
-      <Button
-        onClick={save}
-      >
-        Send
-      </Button>
+      <Button onClick={save}>Send</Button>
+      <ImageWrapper onClick={clear} left={left} bottom={bottom}>
+        <Image src={trash}></Image>
+      </ImageWrapper>
     </>
   );
 };

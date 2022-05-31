@@ -100,7 +100,6 @@ const Home = ({ url, token }: Props) => {
   };
 
   useEffect(() => {
-    if(!fingerprint) return;
     hadlePDFUplaod(image);
   }, [image]);
 
