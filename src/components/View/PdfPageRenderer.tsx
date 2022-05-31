@@ -11,47 +11,18 @@ type Props = {
 const PdfPageRenderer = ({ page, onPageLoad }: Props) => {
   const container = useRef<HTMLDivElement | null>(null);
   const canvas = useRef<HTMLCanvasElement | null>(null);
+  const redrawRef = useRef<boolean>(true);
+  const loadRef = useRef<boolean>(false);
 
-  const [load, setLoad] = useState(false);
-  const [width, setWidth] = useState(0);
   const [canvasBounds, setCanvasBounds] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    if (!container.current) return;
-
-    const rect = container.current.getBoundingClientRect();
-    setWidth(rect.width);
-    setLoad(true);
-
-    return () => {
-      setLoad(false);
-    };
+    drawCanvas();
   }, [page]);
 
   useEffect(() => {
-    if (!load || !canvas.current) return;
-    let viewport = page.getViewport({ scale: 1 });
-
-    const canvasContext = canvas.current.getContext("2d");
-    if (!canvasContext) return;
-
-    const scale = width / viewport.width;
-    viewport = page.getViewport({ scale });
-    page.render({
-      canvasContext,
-      viewport,
-    });
-    setCanvasBounds({
-      width: viewport.width,
-      height: viewport.height,
-    });
-
-    onPageLoad({ height: viewport.height, width: viewport.width });
-  }, [load]);
-
-  useEffect(() => {
     function handleResize() {
-      drewCanvas();
+      drawCanvas();
     }
     window.addEventListener("resize", handleResize, { passive: false });
     return () => {
@@ -59,12 +30,18 @@ const PdfPageRenderer = ({ page, onPageLoad }: Props) => {
     };
   }, []);
 
-  function drewCanvas() {
+  function drawCanvas() {
     if (!container.current || !canvas.current) return;
+
+    if (loadRef.current) {
+      redrawRef.current = true;
+      return;
+    }
+    loadRef.current = true;
+
     const rect = container.current.getBoundingClientRect();
     const canvasContext = canvas.current.getContext("2d");
     if (!canvasContext) return;
-    setWidth(rect.width);
     let viewport = page.getViewport({ scale: 1 });
     const scale = rect.width / viewport.width;
     viewport = page.getViewport({ scale });
@@ -72,12 +49,20 @@ const PdfPageRenderer = ({ page, onPageLoad }: Props) => {
       width: viewport.width,
       height: viewport.height,
     });
-    page.render({
+    let task = page.render({
       canvasContext,
       viewport,
     });
+    task.promise.then(() => {
+      loadRef.current = false;
+      if (redrawRef.current) {
+        redrawRef.current = false;
+        drawCanvas();
+        return;
+      }
 
-    onPageLoad({ height: viewport.height, width: viewport.width });
+      onPageLoad({ height: viewport.height, width: viewport.width });
+    });
   }
 
   return (

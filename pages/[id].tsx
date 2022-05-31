@@ -28,7 +28,8 @@ const Home = ({ url, token }: Props) => {
   const [PDFDoc, setPDFDoc] = useState<PDFDocument>();
   const [hasError, setHasError] = useState(false);
   const [signatureFieldRect, setSignatureFieldRect] = useState<PDFTextField>();
-  const [fingerprint, setFingerprint] = useState('');
+  const [fingerprint, setFingerprint] = useState("");
+  const [docFingerprint, setDocFingerprint] = useState('');
   const [canvasSize, setCanvasSize] = useState<IPDFSize>({
     height: 0,
     width: 0,
@@ -45,7 +46,6 @@ const Home = ({ url, token }: Props) => {
     const pdfDoc = await PDFDocument.load(pdfDocPdfBytes);
     const page = pdfDoc.getPage(0);
     const form = pdfDoc.getForm();
-
     setPDFDoc(pdfDoc);
     const signatureFieldRect: PDFTextField = form.getTextField("signature");
     setSignatureFieldRect(signatureFieldRect);
@@ -94,7 +94,7 @@ const Home = ({ url, token }: Props) => {
         return fp.get();
       })
       .then((result: GetResult) => {
-        console.log(result.visitorId);
+        console.log(result);
         setFingerprint(result.visitorId);
       });
   };
@@ -108,10 +108,15 @@ const Home = ({ url, token }: Props) => {
     getPDFPosition(url);
   }, [url]);
 
+  useEffect(() => {
+    getFingerPrint();
+  }, []);
+
   return (
     <PageLayout>
       <DocumentWrapper>
         <PdfViewer
+          getDocFingerprint={(fp: string) => setDocFingerprint(fp)}
           onPageLoad={({ height, width }) => {
             setCanvasSize({ height, width });
           }}
