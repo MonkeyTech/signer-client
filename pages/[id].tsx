@@ -14,7 +14,7 @@ import httpClient from "../classes/httpClient";
 import { uploadFileV2 } from "../src/utils";
 import Image from "next/image";
 import { ModalText } from "../src/components/PopUpModal/PopUpModal.style";
-import FingerprintJS, { Agent, GetResult } from "@fingerprintjs/fingerprintjs";
+import FingerprintJS, { Agent, Component, GetResult, UnknownComponents } from "@fingerprintjs/fingerprintjs";
 import { IPDFSize, IRecSize } from "../src/utils/interface";
 interface Props {
   url: string;
@@ -29,7 +29,8 @@ const Home = ({ url, token }: Props) => {
   const [hasError, setHasError] = useState(false);
   const [signatureFieldRect, setSignatureFieldRect] = useState<PDFTextField>();
   const [fingerprint, setFingerprint] = useState("");
-  const [docFingerprint, setDocFingerprint] = useState('');
+  const [docFingerprint, setDocFingerprint] = useState("");
+  const [timeStamp, setTimeStamp] = useState<number>();
   const [canvasSize, setCanvasSize] = useState<IPDFSize>({
     height: 0,
     width: 0,
@@ -76,6 +77,7 @@ const Home = ({ url, token }: Props) => {
         fingerprint
       );
       setOpenModal(true);
+      setTimeStamp(+new Date());
       if (response === null) setHasError(true);
     } catch (error: any) {
       setHasError(true);
@@ -91,14 +93,24 @@ const Home = ({ url, token }: Props) => {
   const getFingerPrint = () => {
     FingerprintJS.load()
       .then((fp: Agent) => {
-        return fp.get();
+        return fp.get({});
       })
       .then((result: GetResult) => {
-        console.log(result);
-        setFingerprint(result.visitorId);
+        createNewFingerprint(result);
       });
   };
 
+  const createNewFingerprint = async (result: GetResult) => {
+
+    const extendedComponents:UnknownComponents= {
+      timeStamp: { value: +new Date() } as Component<unknown>,
+      docFingerprint: { value: docFingerprint } as Component<unknown>,
+      visitorId: { value: result.visitorId } as Component<unknown>,
+    };
+    const newFingerprint = FingerprintJS.hashComponents(extendedComponents);
+    console.log(newFingerprint, "sss");
+  };
+  
   useEffect(() => {
     hadlePDFUplaod(image);
   }, [image]);
@@ -110,6 +122,7 @@ const Home = ({ url, token }: Props) => {
 
   useEffect(() => {
     getFingerPrint();
+    console.log(+new Date(), "date");
   }, []);
 
   return (
