@@ -3,15 +3,15 @@ import { ReactElement } from "react";
 import { CloseButton, Modal, ModalContent } from "./PopUpModal.style";
 
 interface Props {
-  error: boolean;
+  closeButton?: boolean;
   children: ReactElement;
   onClose:()=> void;
 }
 
-const PopUpModal = ({ children, error, onClose }: Props) => {
+const PopUpModal = ({ children, closeButton = true, onClose }: Props) => {
   return (
     <Modal>
-      { error && <CloseButton onClick={onClose}>X</CloseButton>}
+      { closeButton && <CloseButton onClick={onClose}>X</CloseButton>}
       <ModalContent>{children}</ModalContent>
     </Modal>
   );

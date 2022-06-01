@@ -14,7 +14,12 @@ import httpClient from "../classes/httpClient";
 import { uploadFileV2 } from "../src/utils";
 import Image from "next/image";
 import { ModalText } from "../src/components/PopUpModal/PopUpModal.style";
-import FingerprintJS, { Agent, Component, GetResult, UnknownComponents } from "@fingerprintjs/fingerprintjs";
+import FingerprintJS, {
+  Agent,
+  Component,
+  GetResult,
+  UnknownComponents,
+} from "@fingerprintjs/fingerprintjs";
 import { IPDFSize, IRecSize } from "../src/utils/interface";
 interface Props {
   url: string;
@@ -101,8 +106,7 @@ const Home = ({ url, token }: Props) => {
   };
 
   const createNewFingerprint = async (result: GetResult) => {
-
-    const extendedComponents:UnknownComponents= {
+    const extendedComponents: UnknownComponents = {
       timeStamp: { value: +new Date() } as Component<unknown>,
       docFingerprint: { value: docFingerprint } as Component<unknown>,
       visitorId: { value: result.visitorId } as Component<unknown>,
@@ -110,7 +114,7 @@ const Home = ({ url, token }: Props) => {
     const newFingerprint = FingerprintJS.hashComponents(extendedComponents);
     console.log(newFingerprint, "sss");
   };
-  
+
   useEffect(() => {
     hadlePDFUplaod(image);
   }, [image]);
@@ -122,7 +126,6 @@ const Home = ({ url, token }: Props) => {
 
   useEffect(() => {
     getFingerPrint();
-    console.log(+new Date(), "date");
   }, []);
 
   return (
@@ -150,7 +153,10 @@ const Home = ({ url, token }: Props) => {
           }}
         />
         {openModal && (
-          <PopUpModal error={hasError} onClose={() => setOpenModal(false)}>
+          <PopUpModal
+            closeButton={hasError}
+            onClose={() => setOpenModal(false)}
+          >
             <>
               <Image src={hasError ? decline : success} />
               <ModalText>{`${
