@@ -186,6 +186,7 @@ export async function getStaticProps({ params }: Params) {
         url: template_url,
         token: params.id,
       },
+      revalidate:20,
     };
   } catch (err) {
     return { notFound: true };
